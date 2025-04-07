@@ -18,6 +18,12 @@ If you don't have your API key, get one from [orshot.com](https://orshot.com)
 $response = $client->renderFromTemplate(['templateId'=> 'open-graph-image-1', 'modifications' => $modifications, 'responseType'=> 'url', 'responseFormat' => 'png']);
 ```
 
+### Generate signed URL
+
+```php
+$signed_response = $client->generateSignedUrl(['templateId'=> 'open-graph-image-1', 'expiresAt' => 1744276943, 'modifications' => $modifications, 'renderType'=> 'images', 'responseFormat' => 'png']);
+```
+
 ## Example
 
 ### `Base64` response format
@@ -143,7 +149,7 @@ Use this function to render an image/pdf.
 |----------|----------|-------------|
 | `templateId` | Yes | ID of the template (`open-graph-image-1`, `tweet-image-1`, `beautify-screenshot-1`, ...) |
 | `modifications` | Yes | Modifications for the selected template. |
-| `responseType` | No | `base64` or `binary` (Defaults to `base64`). |
+| `responseType` | No | `base64`, `binary`, `url` (Defaults to `base64`). |
 | `responseFormat` | No | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`). |
 
 For available templates and their modifications refer [Orshot Templates Page](https://orshot.com/templates)
