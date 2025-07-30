@@ -59,6 +59,52 @@ class Client
         }
     }
 
+    /**
+     * Render from studio template
+     * 
+     * @param array $renderOptions Array containing studioTemplateId, modifications, and optional responseType/responseFormat
+     * @return array|string Returns JSON array for base64/url responses, or binary string for binary response
+     */
+    public function renderFromStudioTemplate(array $renderOptions) {
+        $client = new HttpClient();
+
+        $studioTemplateId = $renderOptions['studioTemplateId'];
+        $modifications = $renderOptions['modifications'];
+        $responseType = $renderOptions['responseType'] ?? Constants::DEFAULT_RESPONSE_TYPE;
+        $responseFormat = $renderOptions['responseFormat'] ?? Constants::DEFAULT_RESPONSE_FORMAT;
+
+        $data = [
+            'response' => [
+                'type' => $responseType,
+                'format' => $responseFormat,
+            ],
+            'modifications' => $modifications,
+            'source' => Constants::ORSHOT_SOURCE,
+        ];
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ];
+
+        $endpoint = $this->getBaseUrl() . '/generate/images-from-studio-template/' . $studioTemplateId;
+        
+        $response = $client->post($endpoint, [
+            'json' => $data,
+            'headers' => $headers,
+        ]);
+
+        if ($responseType == 'base64' || $responseType == 'url') {
+            $responseBody = $response->getBody();
+
+            $jsonResponse = json_decode($responseBody, true);
+
+            return $jsonResponse;
+        } else {
+            return $response->getBody()->getContents();
+        }
+    }
+
     public function generateSignedUrl(array $signedUrlOptions) {
         $client = new HttpClient();
 
