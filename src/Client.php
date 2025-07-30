@@ -59,6 +59,48 @@ class Client
         }
     }
 
+    /**
+     * Render from Studio Template
+     * 
+     * @param array $options Array containing studioTemplateId, modifications, and optional responseType and responseFormat
+     * @return mixed Returns JSON array for base64/url response types, or binary content for binary response type
+     */
+    public function renderFromStudioTemplate(array $options) {
+        $client = new HttpClient();
+
+        $studioTemplateId = $options['studioTemplateId'];
+        $modifications = $options['modifications'];
+        $responseType = $options['responseType'] ?? Constants::DEFAULT_RESPONSE_TYPE;
+        $responseFormat = $options['responseFormat'] ?? Constants::DEFAULT_RESPONSE_FORMAT;
+
+        $data = [
+            'studioTemplateId' => $studioTemplateId,
+            'modifications' => $modifications,
+        ];
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ];
+
+        $endpoint = $this->getBaseUrl() . '/studio/render';
+        
+        $response = $client->post($endpoint, [
+            'json' => $data,
+            'headers' => $headers,
+        ]);
+
+        if ($responseType == 'base64' || $responseType == 'url') {
+            $responseBody = $response->getBody();
+
+            $jsonResponse = json_decode($responseBody, true);
+
+            return $jsonResponse;
+        } else {
+            return $response->getBody()->getContents();
+        }
+    }
+
     public function generateSignedUrl(array $signedUrlOptions) {
         $client = new HttpClient();
 
