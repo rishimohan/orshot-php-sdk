@@ -1,20 +1,21 @@
 {
-    "name": "rishimohan/orshot",
-    "description": "Orshot API SDK for PHP",
-    "type": "library",
-    "homepage": "https://orshot.com",
-    "require": {
-        "guzzlehttp/guzzle": "^7.9"
-    },
-    "autoload": {
-        "psr-4": {
-            "Orshot\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "Rishi Mohan",
-            "email": "iamrishi.ms@gmail.com"
-        }
-    ]
+  "name": "rishimohan/orshot",
+  "description": "Orshot API SDK for PHP",
+  "license": "MIT",
+  "type": "library",
+  "homepage": "https://orshot.com",
+  "require": {
+    "guzzlehttp/guzzle": "^7.9"
+  },
+  "autoload": {
+    "psr-4": {
+      "Orshot\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Rishi Mohan",
+      "email": "iamrishi.ms@gmail.com"
+    }
+  ]
 }
