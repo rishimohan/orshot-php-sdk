@@ -95,4 +95,75 @@ class Client
 
         return $jsonResponse;
     }
+
+    public function renderFromStudioTemplate(array $options) {
+        $client = new HttpClient();
+
+        $templateId = $options['templateId'];
+        $modifications = $options['modifications'] ?? null;
+        $responseOptions = $options['response'] ?? [];
+        $pdfOptions = $options['pdfOptions'] ?? null;
+        $videoOptions = $options['videoOptions'] ?? null;
+        $publish = $options['publish'] ?? null;
+
+        $responseType = $responseOptions['type'] ?? Constants::DEFAULT_RESPONSE_TYPE;
+        $responseFormat = $responseOptions['format'] ?? Constants::DEFAULT_RESPONSE_FORMAT;
+
+        $data = [
+            'templateId' => $templateId,
+            'source' => Constants::ORSHOT_SOURCE,
+            'response' => [
+                'type' => $responseType,
+                'format' => $responseFormat,
+            ],
+        ];
+
+        if ($modifications !== null) {
+            $data['modifications'] = $modifications;
+        }
+
+        if (isset($responseOptions['scale'])) {
+            $data['response']['scale'] = $responseOptions['scale'];
+        }
+
+        if (isset($responseOptions['includePages'])) {
+            $data['response']['includePages'] = $responseOptions['includePages'];
+        }
+
+        if (isset($responseOptions['fileName'])) {
+            $data['response']['fileName'] = $responseOptions['fileName'];
+        }
+
+        if ($pdfOptions !== null) {
+            $data['pdfOptions'] = $pdfOptions;
+        }
+
+        if ($videoOptions !== null) {
+            $data['videoOptions'] = $videoOptions;
+        }
+
+        if ($publish !== null) {
+            $data['publish'] = $publish;
+        }
+
+        $headers = [
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ];
+
+        $endpoint = $this->getBaseUrl() . '/studio/render';
+
+        $response = $client->post($endpoint, [
+            'json' => $data,
+            'headers' => $headers,
+        ]);
+
+        if ($responseType == 'base64' || $responseType == 'url') {
+            $responseBody = $response->getBody();
+            $jsonResponse = json_decode($responseBody, true);
+            return $jsonResponse;
+        } else {
+            return $response->getBody()->getContents();
+        }
+    }
 }

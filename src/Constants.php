@@ -4,7 +4,7 @@ namespace Orshot;
 
 class Constants
 {
-    public const DEFAULT_RESPONSE_TYPE = 'base64';
+    public const DEFAULT_RESPONSE_TYPE = 'url';
     public const DEFAULT_RESPONSE_FORMAT = 'png';
     public const DEFAULT_RENDER_TYPE = 'images';
     public const ORSHOT_SOURCE = 'orshot-php-sdk';

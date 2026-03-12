@@ -12,159 +12,161 @@ composer require rishimohan/orshot
 
 If you don't have your API key, get one from [orshot.com](https://orshot.com)
 
-### Render from template
-
 ```php
-$response = $client->renderFromTemplate(['templateId'=> 'open-graph-image-1', 'modifications' => $modifications, 'responseType'=> 'url', 'responseFormat' => 'png']);
-```
-
-### Generate signed URL
-
-```php
-$signed_response = $client->generateSignedUrl(['templateId'=> 'open-graph-image-1', 'expiresAt' => 1744276943, 'modifications' => $modifications, 'renderType'=> 'images', 'responseFormat' => 'png']);
-```
-
-## Example
-
-### `Base64` response format
-
-```php
-<?php 
+<?php
 
 require 'vendor/autoload.php';
 
 use Orshot\Client;
 
-$client = new Client("os-ha2jdus1cbz1dpt4mktgjyvx");
-
-$modifications = [
-    'title' => 'Title from PHP SDK.',
-    'description' => 'Description from PHP SDK.'
-];
-
-$response = $client->renderFromTemplate(['templateId'=> 'open-graph-image-1', 'modifications' => $modifications, 'responseType'=> 'base64', 'responseFormat' => 'png']);
-print_r($response['data']);
+$client = new Client("YOUR_ORSHOT_API_KEY");
 ```
 
-Output
+## renderFromStudioTemplate
 
-```
-Array
-(
-    [content] => data:image/png;base64,iVBORw0K...
-    [format] => png
-    [type] => base64
-    [responseTime] => 2787.17
-)
-```
+Render from a custom [Studio template](https://orshot.com/features/orshot-studio). Supports image, PDF, video generation and publishing to social accounts.
 
-### `URL` response format
+### Generate Image
 
 ```php
-<?php 
-
-require 'vendor/autoload.php';
-
-use Orshot\Client;
-
-$client = new Client("os-ha2jdus1cbz1dpt4mktgjyvx");
-
-$modifications = [
-    'title' => 'Title from PHP SDK.',
-    'description' => 'Description from PHP SDK.'
-];
-
-$response = $client->renderFromTemplate(['templateId'=> 'open-graph-image-1', 'modifications' => $modifications, 'responseType'=> 'url', 'responseFormat' => 'png']);
-print_r($response['data']);
+$response = $client->renderFromStudioTemplate([
+    'templateId' => 1234,
+    'modifications' => [
+        'title' => 'Orshot Studio',
+        'description' => 'Generate images from custom templates',
+    ],
+    'response' => [ 'type' => 'url', 'format' => 'png', 'scale' => 2 ],
+]);
 ```
 
-Output
-
-```
-Array
-(
-    [content] => https://storage.orshot.com/00632982-fd46-44ff-9a61-f41edf1b8e62/images/KwSv2IS4jwH.png
-    [type] => url
-    [format] => png
-    [responseTime] => 3775.54
-)
-```
-
-### `Binary` response format
+### Generate PDF
 
 ```php
-<?php 
-
-require 'vendor/autoload.php';
-
-use Orshot\Client;
-
-$client = new Client("os-ha2jdus1cbz1dpt4mktgjyvx");
-
-$modifications = [
-    'title' => 'Title from PHP SDK.',
-    'description' => 'Description from PHP SDK.'
-];
-
-$response = $client->renderFromTemplate(['templateId'=> 'open-graph-image-1', 'modifications' => $modifications, 'responseType'=> 'binary', 'responseFormat' => 'png']);
-file_put_contents('og.png', $response);
+$response = $client->renderFromStudioTemplate([
+    'templateId' => 1234,
+    'modifications' => [ 'title' => 'Invoice #1234' ],
+    'response' => [ 'type' => 'url', 'format' => 'pdf' ],
+    'pdfOptions' => [
+        'margin' => '20px',
+        'rangeFrom' => 1,
+        'rangeTo' => 2,
+        'colorMode' => 'rgb',
+        'dpi' => 300,
+    ],
+]);
 ```
 
-This example writes the binary image to the file `og.png`
-
-### Signed URL
+### Generate Video
 
 ```php
-<?php 
-
-require 'vendor/autoload.php';
-
-use Orshot\Client;
-
-$client = new Client("os-ha2jdus1cbz1dpt4mktgjyvx");
-
-$modifications = [
-    'title' => 'Title from PHP SDK.',
-    'description' => 'Description from PHP SDK.'
-];
-
-$signed_response = $client->generateSignedUrl(['templateId'=> 'open-graph-image-1', 'expiresAt' => 1744276943, 'modifications' => $modifications, 'renderType'=> 'images', 'responseFormat' => 'png']);
-print_r($signed_response['data']);
+$response = $client->renderFromStudioTemplate([
+    'templateId' => 1234,
+    'modifications' => [
+        'videoElement' => 'https://example.com/custom-video.mp4',
+        'videoElement.trimStart' => 0,
+        'videoElement.trimEnd' => 10,
+    ],
+    'response' => [ 'type' => 'url', 'format' => 'mp4' ],
+    'videoOptions' => [ 'trimStart' => 0, 'trimEnd' => 20, 'muted' => false, 'loop' => true ],
+]);
 ```
 
-Output
+### Publish to Social Accounts
 
+```php
+$response = $client->renderFromStudioTemplate([
+    'templateId' => 1234,
+    'modifications' => [ 'title' => 'Check out our latest update!' ],
+    'response' => [ 'type' => 'url', 'format' => 'png' ],
+    'publish' => [
+        'accounts' => [1, 2],
+        'content' => 'Check out our latest design!',
+    ],
+]);
+// $response['publish'] => [['platform' => 'twitter', 'username' => 'acmehq', 'status' => 'published'], ...]
 ```
-Array
-(
-    [url] => https://api.orshot.com/v1/generate/images?description=Description%20from%20PHP%20SDK.&expiresAt=1744276943&id=36&templateId=open-graph-image-1&title=Title%20from%20PHP%20SDK.&signature=7ede3e531de82cbage6174f8f684840b6f8ed0281d5115a748dce924c014daa7
-)
+
+### Schedule a Post
+
+```php
+$response = $client->renderFromStudioTemplate([
+    'templateId' => 1234,
+    'modifications' => [ 'title' => 'Scheduled post' ],
+    'response' => [ 'type' => 'url', 'format' => 'png' ],
+    'publish' => [
+        'accounts' => [1],
+        'content' => 'This will be posted later!',
+        'schedule' => [ 'scheduledFor' => '2026-04-01T10:00:00Z' ],
+        'timezone' => 'America/New_York',
+    ],
+]);
 ```
+
+### Parameters
+
+| key                             | required | description                                                                    |
+| ------------------------------- | -------- | ------------------------------------------------------------------------------ |
+| `templateId`                    | Yes      | ID of the Studio template (integer).                                           |
+| `modifications`                 | No       | Array of dynamic modifications for the template.                               |
+| `response.type`                 | No       | `base64`, `binary`, `url` (Defaults to `url`).                                 |
+| `response.format`               | No       | `png`, `webp`, `jpg`, `jpeg`, `pdf`, `mp4`, `webm`, `gif` (Defaults to `png`). |
+| `response.scale`                | No       | Scale of the output (`1` = original, `2` = double). Defaults to `1`.           |
+| `response.includePages`         | No       | Page numbers to render for multi-page templates (e.g. `[1, 3]`).               |
+| `response.fileName`             | No       | Custom file name (without extension). Works with `url` and `binary` types.     |
+| `pdfOptions`                    | No       | `{ margin, rangeFrom, rangeTo, colorMode, dpi }`                               |
+| `videoOptions`                  | No       | `{ trimStart, trimEnd, muted, loop }`                                          |
+| `publish.accounts`              | No       | Array of social account IDs from your workspace.                               |
+| `publish.content`               | No       | Caption/text for the social post.                                              |
+| `publish.isDraft`               | No       | `true` to save as draft instead of publishing.                                 |
+| `publish.schedule.scheduledFor` | No       | ISO date string to schedule the post.                                          |
+| `publish.timezone`              | No       | Timezone string (e.g. `"America/New_York"`).                                   |
+| `publish.platformOptions`       | No       | Per-account options keyed by account ID.                                       |
+
+---
 
 ## renderFromTemplate
 
-Use this function to render an image/pdf.
+Render from a pre-built Orshot template.
 
-| argument | required | description |
-|----------|----------|-------------|
-| `templateId` | Yes | ID of the template (`open-graph-image-1`, `tweet-image-1`, `beautify-screenshot-1`, ...) |
-| `modifications` | Yes | Modifications for the selected template. |
-| `responseType` | No | `base64`, `binary`, `url` (Defaults to `base64`). |
-| `responseFormat` | No | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`). |
+```php
+$response = $client->renderFromTemplate([
+    'templateId' => 'open-graph-image-1',
+    'modifications' => [ 'title' => 'Hello World' ],
+    'responseType' => 'url',
+    'responseFormat' => 'png',
+]);
+```
+
+| key              | required | description                                                      |
+| ---------------- | -------- | ---------------------------------------------------------------- |
+| `templateId`     | Yes      | ID of the template (`open-graph-image-1`, `tweet-image-1`, etc.) |
+| `modifications`  | Yes      | Modifications for the selected template.                         |
+| `responseType`   | No       | `base64`, `binary`, `url` (Defaults to `url`).                   |
+| `responseFormat` | No       | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`).         |
 
 For available templates and their modifications refer [Orshot Templates Page](https://orshot.com/templates)
 
 ## generateSignedUrl
 
-Use this function to generate signed URL.
+Generate a signed URL for a template.
 
-| key | required | description |
-|----------|----------|-------------|
-| `templateId` | Yes | ID of the template (`open-graph-image-1`, `tweet-image-1`, `beautify-screenshot-1`, ...) |
-| `modifications` | Yes | Modifications for the selected template. |
-| `expiresAt` | Yes | Expires at in unix timestamp (Number). |
-| `renderType` | No | `images`, `pdfs` (Defaults to `images`). |
-| `responseFormat` | No | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`). |
+```php
+$response = $client->generateSignedUrl([
+    'templateId' => 'open-graph-image-1',
+    'modifications' => [ 'title' => 'Hello World' ],
+    'expiresAt' => 1744276943,
+    'renderType' => 'images',
+    'responseFormat' => 'png',
+]);
+```
+
+| key              | required | description                                              |
+| ---------------- | -------- | -------------------------------------------------------- |
+| `templateId`     | Yes      | ID of the template.                                      |
+| `modifications`  | Yes      | Modifications for the selected template.                 |
+| `expiresAt`      | Yes      | Expires at in unix timestamp (Number).                   |
+| `renderType`     | No       | `images`, `pdfs` (Defaults to `images`).                 |
+| `responseFormat` | No       | `png`, `webp`, `pdf`, `jpg`, `jpeg` (Defaults to `png`). |
 
 ## Local development and testing
 
